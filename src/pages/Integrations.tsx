@@ -10,7 +10,12 @@ import {
   Card,
   CardContent,
   CardActions,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { getIntegrationConfig, saveIntegrationConfig } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -21,6 +26,7 @@ const Integrations: React.FC = () => {
   const [configLoading, setConfigLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showToken, setShowToken] = useState(false);
 
   useEffect(() => {
     const fetchIntegrationConfig = async () => {
@@ -39,6 +45,12 @@ const Integrations: React.FC = () => {
 
     fetchIntegrationConfig();
   }, [user]);
+
+  const handleCopyToken = (token: string) => {
+    navigator.clipboard.writeText(token);
+    setSuccess('API token copied to clipboard');
+    setTimeout(() => setSuccess(''), 3000);
+  };
 
   const handleSaveConfig = async () => {
     setLoading(true);
@@ -98,8 +110,29 @@ const Integrations: React.FC = () => {
               value={apiToken}
               onChange={(e) => setApiToken(e.target.value)}
               margin="normal"
-              type="password"
+              type={showToken ? "text" : "password"}
               helperText="You can find your API token in your Wealthbox account settings"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle token visibility"
+                      onClick={() => setShowToken(!showToken)}
+                      edge="end"
+                    >
+                      {showToken ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </IconButton>
+                    <IconButton
+                      aria-label="copy token"
+                      onClick={() => handleCopyToken(apiToken)}
+                      edge="end"
+                      disabled={!apiToken}
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           )}
         </CardContent>
